@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCMod中文网 API</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2, h3 { margin-top: 1.5em; }
+    h1 { 
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    code {
+      background-color: #f5f5f5;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .endpoint {
+      margin-bottom: 20px;
+      border-left: 4px solid #3eb370;
+      padding-left: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th { background-color: #f5f5f5; }
+    a { color: #0366d6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer { 
+      margin-top: 30px;
+      padding-top: 20px; 
+      border-top: 1px solid #eee;
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>MCMod中文网 API</h1>
+  <p>用于获取MCMod中文网数据的API服务</p>
+  
+  <h2>API 端点</h2>
+  
+  <div class="endpoint">
+    <h3>获取模组详情</h3>
+    <code>GET /api/mod?id={modId}</code>
+    <p>返回指定ID的模组详细信息</p>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>数字</td><td>模组的唯一标识符</td></tr>
+    </table>
+    <p>示例: <a href="./api/mod?id=2" target="_blank">/api/mod?id=2</a></p>
+  </div>
+  
+  <div class="endpoint">
+    <h3>获取物品详情</h3>
+    <code>GET /api/item?id={itemId}</code>
+    <p>返回指定ID的物品详细信息</p>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>数字</td><td>物品的唯一标识符</td></tr>
+    </table>
+    <p>示例: <a href="./api/item?id=1234" target="_blank">/api/item?id=1234</a></p>
+  </div>
+  
+  <div class="endpoint">
+    <h3>获取模组包详情</h3>
+    <code>GET /api/modpack?id={packId}</code>
+    <p>返回指定ID的模组包详细信息</p>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>数字</td><td>模组包的唯一标识符</td></tr>
+    </table>
+    <p>示例: <a href="./api/modpack?id=567" target="_blank">/api/modpack?id=567</a></p>
+  </div>
+  
+  <div class="endpoint">
+    <h3>获取教程详情</h3>
+    <code>GET /api/course?id={courseId}</code>
+    <p>返回指定ID的教程详细信息</p>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>数字</td><td>教程的唯一标识符</td></tr>
+    </table>
+    <p>示例: <a href="./api/course?id=789" target="_blank">/api/course?id=789</a></p>
+  </div>
+  
+  <div class="endpoint">
+    <h3>获取服务器详情</h3>
+    <code>GET /api/server?id={serverId}</code>
+    <p>返回指定ID的服务器详细信息</p>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td>id</td><td>数字</td><td>服务器的唯一标识符</td></tr>
+    </table>
+    <p>示例: <a href="./api/server?id=123" target="_blank">/api/server?id=123</a></p>
+  </div>
+  
+  <div class="endpoint">
+    <h3>搜索内容</h3>
+    <code>GET /api/search?q={查询词}</code>
+    <p>使用关键词搜索所有类型的内容</p>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td>q</td><td>字符串</td><td>搜索关键词</td></tr>
+    </table>
+    <p>示例: <a href="./api/search?q=机械" target="_blank">/api/search?q=机械</a></p>
+  </div>
+  
+  <div class="endpoint">
+    <h3>搜索服务器</h3>
+    <code>GET /api/search/server?q={查询词}&page={页码}</code>
+    <p>搜索服务器，支持分页</p>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td>q</td><td>字符串</td><td>搜索关键词</td></tr>
+      <tr><td>page</td><td>数字</td><td>页码，默认为1</td></tr>
+    </table>
+    <p>示例: <a href="./api/search/server?q=生存&page=1" target="_blank">/api/search/server?q=生存&page=1</a></p>
+  </div>
+  
+  <div class="endpoint">
+    <h3>获取模组列表</h3>
+    <code>GET /api/list?category={分类}&page={页码}</code>
+    <p>获取指定分类的模组列表，支持分页</p>
+    <table>
+      <tr><th>参数</th><th>类型</th><th>说明</th></tr>
+      <tr><td>category</td><td>字符串</td><td>分类名称（可选）</td></tr>
+      <tr><td>page</td><td>数字</td><td>页码，默认为1</td></tr>
+    </table>
+    <p>示例: </p>
+    <ul>
+      <li>所有模组：<a href="./api/list?page=1" target="_blank">/api/list?page=1</a></li>
+      <li>特定分类：<a href="./api/list?category=magic&page=1" target="_blank">/api/list?category=magic&page=1</a></li>
+    </ul>
+  </div>
+
+  <h2>响应示例</h2>
+  <pre><code>{
+  "id": "2",
+  "name": "工业时代2",
+  "description": "工业时代2是一个流行的科技模组，添加了各种机器和能源系统...",
+  "authors": ["IC2 Dev Team"],
+  "version": "2.8.221",
+  "imageUrl": "https://www.mcmod.cn/images/class/2.jpg",
+  "categories": ["科技", "工具"],
+  "mcVersions": ["1.12.2", "1.7.10"]
+}</code></pre>
+
+  <footer>
+    <h3>注意事项</h3>
+    <ul>
+      <li>所有API请求都支持CORS</li>
+      <li>请求有10秒超时限制</li>
+      <li>数据来源于mcmod.cn，请遵守原站的使用条款</li>
+      <li>本API仅供学习和研究使用，请尊重原站版权</li>
+    </ul>
+    <p>© 2023 MCMod API - 基于 Cloudflare Workers</p>
+  </footer>
+</body>
+</html>

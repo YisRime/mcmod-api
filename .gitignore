@@ -1,0 +1,43 @@
+# 依赖文件
+node_modules/
+package-lock.json
+yarn.lock
+
+# 构建输出
+dist/
+build/
+.wrangler/
+.dev.vars
+
+# TypeScript缓存
+*.tsbuildinfo
+.tscache/
+
+# 日志文件
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# 环境变量
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE 和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+.history/
+
+# Wrangler 特有的文件
+.cargo/
+target/
+wrangler-dist/
+worker/

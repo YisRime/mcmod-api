@@ -1,0 +1,3 @@
+name = "mcmod-api"
+main = "src/index.ts"
+compatibility_date = "2023-11-01"
