@@ -161,7 +161,17 @@ const decodeExternalLink = (url: string): string => {
   if (!targetMatch) return url;
   
   try {
-    return Buffer.from(targetMatch[1], 'base64').toString('utf-8');
+    // 替换 Buffer 的解码方式，使用 Web API
+    const base64 = targetMatch[1].replace(/-/g, '+').replace(/_/g, '/');
+    // 解码 Base64 为二进制字符串
+    const binaryString = atob(base64);
+    // 转换二进制字符串为 UTF-8
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    // 使用 TextDecoder 解码为 UTF-8 字符串
+    return new TextDecoder('utf-8').decode(bytes);
   } catch (error) {
     log('URL_DECODE', `解码链接失败: ${url}, 错误: ${error}`, error);
     return url;
