@@ -26,7 +26,7 @@ export const FETCH_OPTS = {
   cf: { cacheTtl: 3600, cacheEverything: true }
 };
 
-export const TIMEOUT = 10000;
+export const TIMEOUT = 30000; // 从10000毫秒(10秒)延长到30000毫秒(30秒)
 
 // 调试日志系统
 export const DEBUG = true; // 设置为false可以在生产环境禁用日志
