@@ -145,7 +145,7 @@ interface Mod {
   introduction?: string;
 }
 
-// 工具函数
+// 工具函数精简
 const extractCategoryId = (url: string): string | undefined => url.match(/category=(\d+)/)?.[1];
 
 const cleanImageUrl = (url: string): string => {
@@ -156,74 +156,71 @@ const cleanImageUrl = (url: string): string => {
 };
 
 const decodeExternalLink = (url: string): string => {
-  if (!url || !url.includes('/target/')) return url;
+  if (!url) return url;
+  const targetMatch = url.match(/link\.mcmod\.cn\/target\/([A-Za-z0-9+/=]+)/);
+  if (!targetMatch) return url;
+  
   try {
-    const base64Part = url.split('/target/')[1];
-    return base64Part ? Buffer.from(base64Part, 'base64').toString('utf-8') : url;
+    return Buffer.from(targetMatch[1], 'base64').toString('utf-8');
   } catch (error) {
-    log('URL_DECODE', `解码链接失败: ${error}`, error);
+    log('URL_DECODE', `解码链接失败: ${url}, 错误: ${error}`, error);
     return url;
   }
 };
 
 const resolveUrl = (path: string, base: string): string => {
   if (!path) return '';
-  
   path = cleanImageUrl(path);
   
-  if (path.includes('link.mcmod.cn/target/')) {
-    return decodeExternalLink(path);
-  }
-  
-  if (path.startsWith('//')) {
-    return 'https:' + path;
-  }
-  
-  if (path.startsWith('/') && !path.startsWith('//')) {
-    return base + path;
-  }
+  if (path.includes('link.mcmod.cn/target/')) return decodeExternalLink(path);
+  if (path.startsWith('//')) return 'https:' + path;
+  if (path.startsWith('/') && !path.startsWith('//')) return base + path;
   
   return path;
 };
 
-// 从HTML中提取popover链接映射
-const extractPopoverLinks = ($: cheerio.CheerioAPI): Record<string, string> => {
-  const linkMapping: Record<string, string> = {};
-  const scripts = $('script').map((_, el) => $(el).html()).get().join('');
-  const popoverRegex = /\$\("#(link_[^"]+)"\)\.webuiPopover\(\{[^}]*content:"[^"]*<p><strong>([^<]+)<\/strong>/g;
-  let match;
-  
-  while ((match = popoverRegex.exec(scripts)) !== null) {
-    linkMapping[match[1]] = match[2];
-  }
-  
-  return linkMapping;
-};
-
-// 解析HTML为Markdown
-const htmlToMarkdown = (html: string): string => {
+// 优化HTML到Markdown的转换
+const htmlToMarkdown = (html: string, popoverUrlMap: Record<string, string> = {}): string => {
   if (!html) return '';
   
   const $ = cheerio.load(html);
   $('script').remove();
   
-  // 处理图片和链接
+  // 处理图片
   $('img').each((_, el) => {
-    const $el = $(el);
-    const src = $el.attr('data-src') || $el.attr('src') || '';
+    const src = $(el).attr('data-src') || $(el).attr('src') || '';
     const imgUrl = src.startsWith('//') ? 'https:' + src : src;
-    const alt = $el.attr('alt') || '图片';
-    $el.replaceWith(`![${alt}](${imgUrl})`);
+    const alt = $(el).attr('alt') || '图片';
+    $(el).replaceWith(`![${alt}](${imgUrl})`);
   });
   
+  // 处理链接
   $('a').each((_, el) => {
     const $el = $(el);
-    const text = $el.text().trim() || 'link';
+    
+    // 检查链接是否有文本内容，如果没有则跳过
+    const text = $el.text().trim();
+    if (!text) {
+      return;
+    }
+    
+    $el.attr('data-markdown-processed', 'true');
+    
+    // 处理JavaScript弹出式链接
+    const linkId = $el.attr('id') || '';
+    if (linkId && popoverUrlMap[linkId]) {
+      const href = popoverUrlMap[linkId];
+      $el.replaceWith(`[${text}](${href})`);
+      return;
+    }
+    
     let href = $el.attr('href') || '';
     if (href.startsWith('//')) href = 'https:' + href;
     
-    if ($el.children('img').length === 1 && $el.contents().length === 1) {
-      // 图片链接
+    // 根据内容类型转换
+    if (/\[.*?\]\(.*?\)/.test(text)) {
+      $el.replaceWith(text);
+    } else if ($el.children('img').length === 1 && $el.contents().length === 1) {
       const $img = $el.children('img');
       const imgSrc = $img.attr('src') || '';
       const imgAlt = $img.attr('alt') || '图片';
@@ -233,11 +230,10 @@ const htmlToMarkdown = (html: string): string => {
     }
   });
   
-  // 处理基本格式
+  // 处理标题和基本格式
   $('h1, h2, h3, h4, h5, h6').each((_, el) => {
-    const $el = $(el);
     const level = parseInt(el.tagName.toLowerCase().charAt(1));
-    $el.replaceWith(`\n\n${'#'.repeat(level)} ${$el.text().trim()}\n\n`);
+    $(el).replaceWith(`\n\n${'#'.repeat(level)} ${$(el).text().trim()}\n\n`);
   });
   
   $('p').each((_, el) => { $(el).replaceWith(`\n\n${$(el).text().trim()}\n\n`); });
@@ -246,39 +242,28 @@ const htmlToMarkdown = (html: string): string => {
   
   // 处理列表
   $('ul').each((_, el) => {
-    const $el = $(el);
-    $el.find('li').each((__, li) => {
-      $(li).replaceWith(`\n- ${$(li).text().trim()}`);
-    });
-    $el.replaceWith($el.html() + '\n\n');
+    $(el).find('li').each((__, li) => { $(li).replaceWith(`\n- ${$(li).text().trim()}`); });
+    $(el).replaceWith($(el).html() + '\n\n');
   });
   
   $('ol').each((_, el) => {
-    const $el = $(el);
-    $el.find('li').each((i, li) => {
-      $(li).replaceWith(`\n${i + 1}. ${$(li).text().trim()}`);
-    });
-    $el.replaceWith($el.html() + '\n\n');
+    $(el).find('li').each((i, li) => { $(li).replaceWith(`\n${i + 1}. ${$(li).text().trim()}`); });
+    $(el).replaceWith($(el).html() + '\n\n');
   });
   
-  // 简化输出处理
-  let markdown = $.text()
+  // 清理并返回
+  return $.text()
     .replace(/([^\s])\n([^\s])/g, '$1 $2')
     .replace(/\n{3,}/g, '\n\n')
     .replace(/\s{3,}/g, ' ')
     .replace(/\[([^\]]+)\]\(\/\/([^)]+)\)/g, (_, text, url) => `[${text}](https://${url})`)
     .trim();
-  
-  return markdown;
 };
 
-// 解析URL中的用户ID
-const extractUserId = (url: string): string => {
-  const match = url.match(/\/(\d+)\/?$/);
-  return match ? match[1] : '';
-};
+// 提取用户ID的简化函数
+const extractUserId = (url: string): string => url.match(/\/(\d+)\/?$/)?.[1] || '';
 
-// 解析函数
+// 优化解析团队成员函数
 const parseTeamMembers = ($: cheerio.CheerioAPI, selector: string, url: string): TeamMember[] => {
   const members: TeamMember[] = [];
   if ($(selector).find('.null').length) return members;
@@ -287,21 +272,19 @@ const parseTeamMembers = ($: cheerio.CheerioAPI, selector: string, url: string):
     const name = $(el).find('.text a').text().trim();
     if (!name) return;
     
-    const memberUrl = resolveUrl($(el).find('.text a').attr('href') || '', url);
-    
     members.push({
       name,
       avatar: resolveUrl($(el).find('.img img').attr('src') || '', url),
-      id: extractUserId(memberUrl)
+      id: extractUserId(resolveUrl($(el).find('.text a').attr('href') || '', url))
     });
   });
   
   return members;
 };
 
+// 简化其他解析函数
 const parseAuthors = ($: cheerio.CheerioAPI, url: string): Author[] => {
   const authors: Author[] = [];
-  
   $('.author .member').each((_, el) => {
     authors.push({
       name: $(el).find('.name a').text().trim(),
@@ -310,17 +293,17 @@ const parseAuthors = ($: cheerio.CheerioAPI, url: string): Author[] => {
       url: resolveUrl($(el).find('.name a').attr('href') || '', url)
     });
   });
-  
   return authors;
 };
 
+// 简化分类解析
 const parseCategories = ($: cheerio.CheerioAPI): string[] => {
   const categories: string[] = [];
   
+  // 主分类
   $('.common-class-category .main a').each((_, el) => {
     const href = $(el).attr('href') || '';
     const categoryId = extractCategoryId(href);
-    
     const xlinkHref = $(el).find('svg use').attr('xlink:href') || '';
     const mainCategoryId = xlinkHref.match(/#common-icon-category-(\d+)/)?.[1] || categoryId;
     
@@ -329,6 +312,7 @@ const parseCategories = ($: cheerio.CheerioAPI): string[] => {
     }
   });
   
+  // 普通分类
   $('.common-class-category .normal').each((_, el) => {
     const categoryId = extractCategoryId($(el).attr('href') || '');
     if (categoryId && !categories.includes(categoryId)) {
@@ -339,104 +323,52 @@ const parseCategories = ($: cheerio.CheerioAPI): string[] => {
   return categories;
 };
 
+// 提取JS弹出链接的真实URL
+const extractPopoverUrl = (html: string): Record<string, string> => {
+  const urlMap: Record<string, string> = {};
+  
+  // 匹配 $("#link_XXXX").webuiPopover 的模式
+  const scriptRegex = /\$\("#(link_[a-zA-Z0-9_]+)"\)\.webuiPopover\({[^}]*content:"[^"]*<strong>([^<]+)<\/strong>/g;
+  
+  let match;
+  while ((match = scriptRegex.exec(html)) !== null) {
+    const id = match[1]; // 完整的link_ID
+    const url = match[2]; // URL在<strong>标签中
+    
+    if (id && url) {
+      urlMap[id] = url;
+    }
+  }
+  
+  return urlMap;
+};
+
+// 优化链接解析 - 移除JavaScript弹出链接处理
 const parseLinks = ($: cheerio.CheerioAPI, url: string): Link[] => {
   const links: Link[] = [];
-  const popoverLinks = extractPopoverLinks($);
+  const processedUrls = new Set<string>();
   
+  // 处理常规链接
   $('.common-link-icon-frame li').each((_, el) => {
     const a = $(el).find('a');
     const href = a.attr('href') || '';
-    let finalUrl = resolveUrl(href, url);
+    const title = a.attr('data-original-title')?.trim() || $(el).find('.name').text().trim();
     
-    if (href.includes('javascript:void(0);')) {
-      const linkId = href.match(/id="(link_[^"]+)"/)?.[1];
-      if (linkId && popoverLinks[linkId]) {
-        finalUrl = popoverLinks[linkId];
-      }
+    // 确定最终URL
+    let finalUrl = '';
+    if (href && !href.includes('javascript:')) {
+      finalUrl = href;
     }
     
-    links.push({
-      title: a.attr('data-original-title')?.trim(),
-      url: finalUrl
-    });
+    // 添加有效链接
+    finalUrl = resolveUrl(finalUrl, url);
+    if (finalUrl && !finalUrl.includes('javascript:') && !processedUrls.has(finalUrl)) {
+      processedUrls.add(finalUrl);
+      links.push({ title, url: finalUrl });
+    }
   });
   
   return links;
-};
-
-const parseStatistics = ($: cheerio.CheerioAPI): Statistics => {
-  const stats: Statistics = {
-    viewCount: $('.infos .span').first().find('.n').text().trim(),
-    fillRate: $('.infos .span').last().find('.n').text().trim(),
-    popularity: $('.block-left .up').text().trim(),
-    downloadCount: $('.download-btn').attr('title')?.replace('共', '').replace('次下载', '').trim(),
-    yesterdayIndex: $('.block-right .text').first().text().replace('昨日指数:', '').trim(),
-    yesterdayAvgIndex: $('.block-right .text').eq(1).text().replace('昨日平均指数:', '').trim(),
-    editCount: $('.class-info-left li').filter((_, el) => $(el).text().includes('编辑次数')).text().replace('编辑次数:', '').replace('次', '').trim()
-  };
-  
-  // 其他统计数据
-  const modpackCount = $('.infolist.modpack').text().match(/有\s+(\d+)\s+个已收录的整合包/)?.[1];
-  if (modpackCount) stats.modpackCount = modpackCount;
-  
-  const resourceMatch = $('.infolist.worldgen').text().match(/有\s+(\d+)\s+条矿物\/自然资源分布图数据，共涉及\s+(\d+)\s+个资料/);
-  if (resourceMatch) {
-    stats.resourceCount = resourceMatch[1];
-    stats.resourceDataCount = resourceMatch[2];
-  }
-  
-  const serverCount = $('.infolist.server-count').text().match(/有\s+(\d+)\s+台已收录的服务器/)?.[1];
-  const serverInstallRate = $('.infolist.server-pre').text().match(/安装率为\s+([0-9.]+)%/)?.[1];
-  
-  if (serverCount) stats.serverCount = serverCount;
-  if (serverInstallRate) stats.serverInstallRate = serverInstallRate;
-  
-  return stats;
-};
-
-const parseModResources = ($: cheerio.CheerioAPI): ModResource[] => {
-  const resources: ModResource[] = [];
-  
-  $('.class-item-type .mold').each((_, el) => {
-    if ($(el).hasClass('mold-0')) return;
-    
-    const link = $(el).find('a');
-    const typeId = link.attr('href')?.match(/\/\d+-(\d+)\.html$/)?.[1] || '';
-    const count = parseInt(link.find('.count').text().match(/\((\d+)条\)/)?.[1] || '0');
-    
-    resources.push({ typeId, count });
-  });
-  
-  return resources;
-};
-
-const parseModRelations = ($: cheerio.CheerioAPI): ModRelation[] => {
-  const relations: ModRelation[] = [];
-  
-  $('.class-relation-list fieldset').each((_, fieldset) => {
-    const version = $(fieldset).find('legend').text().trim();
-    const relation: ModRelation = { version };
-    
-    $(fieldset).find('li.relation').each((_, relEl) => {
-      const relType = $(relEl).find('span').text().includes('依赖') ? 'dependencyMods' : 'relationMods';
-      const mods: RelatedMod[] = [];
-      
-      $(relEl).find('ul a').each((_, modEl) => {
-        mods.push({
-          id: $(modEl).attr('href')?.match(/\/class\/(\d+)\.html$/)?.[1],
-          name: $(modEl).text().trim()
-        });
-      });
-      
-      if (mods.length > 0) {
-        relation[relType as keyof Pick<ModRelation, 'dependencyMods' | 'relationMods'>] = mods;
-      }
-    });
-    
-    relations.push(relation);
-  });
-  
-  return relations;
 };
 
 const parseDetailedRatings = ($: cheerio.CheerioAPI): Record<string, DetailedRating> => {
@@ -475,66 +407,15 @@ const parseDetailedRatings = ($: cheerio.CheerioAPI): Record<string, DetailedRat
   return detailedRatings;
 };
 
-const parseModTutorials = ($: cheerio.CheerioAPI): ModTutorial[] => {
-  const tutorials: ModTutorial[] = [];
-  const processedIds = new Set<string>();
-  
-  const addTutorial = (title: string, url: string) => {
-    const id = url.match(/\/post\/(\d+)\.html/)?.[1] || '';
-    if (!id || processedIds.has(id)) return;
-    
-    processedIds.add(id);
-    tutorials.push({ id, title });
-  };
-  
-  $('.class-post-frame .post-block').each((_, block) => {
-    const titleEl = $(block).find('.title a');
-    if (titleEl.length) {
-      addTutorial(titleEl.text().trim(), titleEl.attr('href') || '');
-    }
-  });
-  
-  $('.class-post-list li').each((_, item) => {
-    const linkEl = $(item).find('a');
-    if (linkEl.length) {
-      addTutorial(linkEl.text().trim(), linkEl.attr('href') || '');
-    }
-  });
-  
-  return tutorials;
-};
-
-const parseModDiscussions = ($: cheerio.CheerioAPI): ModDiscussion[] => {
-  const discussions: ModDiscussion[] = [];
-  
-  $('.class-thread-list li').each((_, item) => {
-    const linkEl = $(item).find('a');
-    if (!linkEl.length) return;
-    
-    const title = linkEl.text().trim();
-    const url = linkEl.attr('href') || '';
-    const id = url.match(/thread-(\d+)-/)?.[1] || '';
-    
-    if (id) discussions.push({ id, title });
-  });
-  
-  return discussions;
-};
-
-const parseModIntroduction = ($: cheerio.CheerioAPI): string | undefined => {
-  const introContainer = $('.class-menu-main .text-area.common-text.font14').first();
-  if (!introContainer.length) return undefined;
-  
-  // 预处理并转换为Markdown
-  return htmlToMarkdown(introContainer.html() || '');
-};
-
-// 主解析函数
+// 主解析函数优化
 async function parseMod(id: string, url: string, showOthers: boolean = false, showCommunity: boolean = false, showRelations: boolean = false): Promise<Mod> {
   log('MOD', `开始解析模组: ${id}`);
   try {
     const html = await fetchHtml(`${url}/class/${id}.html`);
     const $ = cheerio.load(html);
+    
+    // 提取JavaScript弹出链接
+    const popoverUrlMap = extractPopoverUrl(html);
     
     if ($('.class-title').length === 0) {
       throw new Error(`未找到ID为${id}的模组`);
@@ -556,31 +437,23 @@ async function parseMod(id: string, url: string, showOthers: boolean = false, sh
     };
     
     // 创建兼容性信息对象
-    const compatibility: Compatibility = {};
-    
-    // 提取平台和API信息
-    compatibility.platforms = $('.class-info-left li').filter((_, el) => 
-      $(el).text().includes('支持平台')
-    ).find('a').map((_, el) => $(el).text().trim()).get();
-    
-    compatibility.apis = $('.class-info-left li').filter((_, el) => 
-      $(el).text().includes('运作方式')
-    ).find('a').map((_, el) => $(el).text().trim()).get();
-    
-    compatibility.environment = $('.class-info-left li').filter((_, el) => 
-      $(el).text().includes('运行环境')
-    ).text().replace('运行环境:', '').trim();
+    const compatibility: Compatibility = {
+      platforms: $('.class-info-left li').filter((_, el) => $(el).text().includes('支持平台')).find('a').map((_, el) => $(el).text().trim()).get(),
+      apis: $('.class-info-left li').filter((_, el) => $(el).text().includes('运作方式')).find('a').map((_, el) => $(el).text().trim()).get(),
+      environment: $('.class-info-left li').filter((_, el) => $(el).text().includes('运行环境')).text().replace('运行环境:', '').trim(),
+    };
     
     // 提取MC版本支持
-    compatibility.mcVersions = { forge: [], fabric: [], behaviorPack: [] };
+    const mcVersions: McVersions = {};
     $('.mcver ul').each((_, el) => {
       const loaderLabel = $(el).find('li').first().text().trim();
       const versions = $(el).find('a').map((_, link) => $(link).text().trim()).get();
       
-      if (loaderLabel.includes('行为包')) compatibility.mcVersions!.behaviorPack = versions;
-      else if (loaderLabel.includes('Forge')) compatibility.mcVersions!.forge = versions;
-      else if (loaderLabel.includes('Fabric')) compatibility.mcVersions!.fabric = versions;
+      if (loaderLabel.includes('行为包')) mcVersions.behaviorPack = versions;
+      else if (loaderLabel.includes('Forge')) mcVersions.forge = versions;
+      else if (loaderLabel.includes('Fabric')) mcVersions.fabric = versions;
     });
+    if (Object.keys(mcVersions).length > 0) compatibility.mcVersions = mcVersions;
     
     // 创建基础模组对象
     const mod: Mod = {
@@ -590,30 +463,56 @@ async function parseMod(id: string, url: string, showOthers: boolean = false, sh
       links: parseLinks($, url)
     };
     
+    // 额外信息处理
     if (showOthers) {
-      // 统计、评分和更新日志整合到metrics
-      const statistics = parseStatistics($);
+      // 统计信息
+      const statistics: Statistics = {
+        viewCount: $('.infos .span').first().find('.n').text().trim(),
+        fillRate: $('.infos .span').last().find('.n').text().trim(),
+        popularity: $('.block-left .up').text().trim(),
+        downloadCount: $('.download-btn').attr('title')?.replace('共', '').replace('次下载', '').trim()
+      };
       
-      // 时间信息添加到statistics中
-      statistics.createTime = $('.class-info-left li').filter((_, el) => 
-        $(el).text().includes('收录时间')
-      ).attr('data-original-title')?.trim();
+      // 添加其他统计指标
+      const statsMap: [string, RegExp | string, (v: string) => string][] = [
+        ['yesterdayIndex', '.block-right .text:first', v => v.replace('昨日指数:', '').trim()],
+        ['yesterdayAvgIndex', '.block-right .text:eq(1)', v => v.replace('昨日平均指数:', '').trim()],
+        ['editCount', /编辑次数:(\d+)次/, v => v.replace('编辑次数:', '').replace('次', '').trim()],
+        ['modpackCount', /有\s+(\d+)\s+个已收录的整合包/, v => v.match(/有\s+(\d+)\s+个已收录的整合包/)?.[1] || ''],
+        ['serverCount', /有\s+(\d+)\s+台已收录的服务器/, v => v.match(/有\s+(\d+)\s+台已收录的服务器/)?.[1] || ''],
+        ['serverInstallRate', /安装率为\s+([0-9.]+)%/, v => v.match(/安装率为\s+([0-9.]+)%/)?.[1] || '']
+      ];
       
-      statistics.lastUpdate = $('.class-info-left li').filter((_, el) => 
-        $(el).text().includes('最后编辑')
-      ).attr('data-original-title')?.trim();
+      for (const [key, selector, transform] of statsMap) {
+        if (typeof selector === 'string') {
+          const value = $(selector).text();
+          if (value) statistics[key as keyof Statistics] = transform(value);
+        } else {
+          $('.class-info-left li, .infolist').each((_, el) => {
+            const text = $(el).text();
+            const match = text.match(selector);
+            if (match) statistics[key as keyof Statistics] = transform(text);
+          });
+        }
+      }
       
-      statistics.lastRecommend = $('.class-info-left li').filter((_, el) => 
-        $(el).text().includes('最后推荐')
-      ).attr('data-original-title')?.trim();
+      // 时间信息
+      const timeSelectors = [
+        ['createTime', '收录时间'],
+        ['lastUpdate', '最后编辑'],
+        ['lastRecommend', '最后推荐']
+      ];
       
-      // 提取评分
-      const redVotes = $('.class-card .text-block span').first().text().match(/红票(\d+)/)?.[1];
-      const blackVotes = $('.class-card .text-block span').last().text().match(/黑票(\d+)/)?.[1];
+      for (const [key, label] of timeSelectors) {
+        statistics[key as keyof Statistics] = $('.class-info-left li')
+          .filter((_, el) => $(el).text().includes(label))
+          .attr('data-original-title')?.trim();
+      }
       
-      const ratings = {
-        redVotes,
-        blackVotes,
+      // 评分信息
+      const ratings: Ratings = {
+        redVotes: $('.class-card .text-block span').first().text().match(/红票(\d+)/)?.[1],
+        blackVotes: $('.class-card .text-block span').last().text().match(/黑票(\d+)/)?.[1],
         detailedRatings: parseDetailedRatings($)
       };
       
@@ -623,23 +522,17 @@ async function parseMod(id: string, url: string, showOthers: boolean = false, sh
         date: $(el).find('.time').text().trim()
       })).get();
       
-      // 整合到metrics
-      mod.metrics = {
-        statistics,
-        ratings,
-        updateLogs
-      };
+      mod.metrics = { statistics, ratings, updateLogs };
       
       // 团队信息
-      const teamSelectors = {
+      const teams: Teams = {};
+      const teamSelectors: Record<string, string> = {
         managementTeam: '.common-imglist-block:contains("管理组") .common-imglist',
         editingTeam: '.common-imglist-block:contains("编辑组") .common-imglist',
         developmentTeam: '.common-imglist-block:contains("开发组") .common-imglist',
         recentEditors: '.common-imglist-block:contains("最近参与编辑") .common-imglist',
         recentVisitors: '.common-imglist-block:contains("最近浏览") .common-imglist'
       };
-      
-      const teams: Teams = {};
       
       for (const [key, selector] of Object.entries(teamSelectors)) {
         const members = parseTeamMembers($, selector, url);
@@ -653,36 +546,81 @@ async function parseMod(id: string, url: string, showOthers: boolean = false, sh
       }
     }
     
-    // 如果请求包含社区内容，则解析教程和讨论
+    // 资源信息
+    mod.resources = $('.class-item-type .mold').filter((_, el) => !$(el).hasClass('mold-0')).map((_, el) => {
+      const link = $(el).find('a');
+      return {
+        typeId: link.attr('href')?.match(/\/\d+-(\d+)\.html$/)?.[1] || '',
+        count: parseInt(link.find('.count').text().match(/\((\d+)条\)/)?.[1] || '0')
+      };
+    }).get();
+    
+    // 社区信息
     if (showCommunity) {
-      const tutorials = parseModTutorials($);
-      const discussions = parseModDiscussions($);
+      const tutorials: ModTutorial[] = [];
+      const processedIds = new Set<string>();
+      
+      // 教程提取
+      const tutorialSelectors = [
+        '.class-post-frame .post-block .title a',
+        '.class-post-list li a'
+      ];
+      
+      for (const selector of tutorialSelectors) {
+        $(selector).each((_, el) => {
+          const title = $(el).text().trim();
+          const url = $(el).attr('href') || '';
+          const id = url.match(/\/post\/(\d+)\.html/)?.[1] || '';
+          
+          if (id && !processedIds.has(id)) {
+            processedIds.add(id);
+            tutorials.push({ id, title });
+          }
+        });
+      }
+      
+      // 讨论提取
+      const discussions = $('.class-thread-list li a').map((_, el) => {
+        const title = $(el).text().trim();
+        const url = $(el).attr('href') || '';
+        const id = url.match(/thread-(\d+)-/)?.[1] || '';
+        return id ? { id, title } : null;
+      }).get().filter(Boolean) as ModDiscussion[];
       
       if (tutorials.length > 0 || discussions.length > 0) {
         mod.community = {};
-        
-        if (tutorials.length > 0) {
-          mod.community.tutorials = tutorials;
-        }
-        
-        if (discussions.length > 0) {
-          mod.community.discussions = discussions;
-        }
+        if (tutorials.length > 0) mod.community.tutorials = tutorials;
+        if (discussions.length > 0) mod.community.discussions = discussions;
       }
     }
     
-    // 提取资源和关系
-    mod.resources = parseModResources($);
-    
-    // 仅当showRelations为true时解析模组关系
+    // 关系信息
     if (showRelations) {
-      mod.relations = parseModRelations($);
+      mod.relations = $('.class-relation-list fieldset').map((_, fieldset) => {
+        const version = $(fieldset).find('legend').text().trim();
+        const relation: ModRelation = { version };
+        
+        $(fieldset).find('li.relation').each((_, relEl) => {
+          const relType = $(relEl).find('span').text().includes('依赖') ? 'dependencyMods' : 'relationMods';
+          const mods = $(relEl).find('ul a').map((_, modEl) => ({
+            id: $(modEl).attr('href')?.match(/\/class\/(\d+)\.html$/)?.[1],
+            name: $(modEl).text().trim()
+          })).get();
+          
+          if (mods.length > 0) {
+            relation[relType as keyof Pick<ModRelation, 'dependencyMods' | 'relationMods'>] = mods;
+          }
+        });
+        
+        return relation;
+      }).get();
     }
     
-    // 提取模组介绍内容
-    const introduction = parseModIntroduction($);
-    if (introduction) {
-      mod.introduction = introduction;
+    // 介绍信息
+    const introContainer = $('.class-menu-main .text-area.common-text.font14').first();
+    if (introContainer.length) {
+      // 传递popoverUrlMap以在Markdown转换中处理JS弹出链接
+      mod.introduction = htmlToMarkdown(introContainer.html() || '', popoverUrlMap);
     }
     
     log('MOD', `模组解析完成: ${mod.basicInfo.name}`);

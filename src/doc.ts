@@ -84,6 +84,7 @@ export async function genDoc(): Promise<Response> {
     <h1>MCmod API 文档</h1>
     <div class="api-info">
       <p>非官方的 MC 百科 API ，用于获取 MC 百科的数据</p>
+      <p>Powered By Yis_Rime</p>
     </div>
   </header>
 
@@ -392,7 +393,7 @@ export async function genDoc(): Promise<Response> {
   </main>
 
   <footer>
-    <p>MCmod API - MC 百科 非官方 API</p>
+    <p>MCmod API - MC 百科非官方 API Powered By Yis_Rime</p>
     <p>数据仅供学习和参考，请勿用于商业用途</p>
   </footer>
 </body>
