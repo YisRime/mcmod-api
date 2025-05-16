@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { createErrorResponse, createSuccessResponse, BASE_URL, validatePage, fetchHtml, resolveUrl, log } from '.';
+import { createErrorResponse, createSuccessResponse, BASE_URL, validatePage, fetchHtml, resolveUrl, log } from '..';
 
 // 类型定义
 interface SearchResult {

@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node dev.ts",
-    "debug": "node --inspect -r ts-node/register dev.ts",
+    "dev": "ts-node src/dev.ts",
+    "debug": "node --inspect -r ts-node/register src/dev.ts",
     "test": "test"
   },
   "dependencies": {

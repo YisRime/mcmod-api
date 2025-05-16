@@ -7,7 +7,7 @@ let worker: any = null;
 // 导入 worker 模块
 async function importWorker() {
   try {
-    const module = await import('./src/index');
+    const module = await import('./index');
     worker = module.default;
     console.log('模块加载成功');
     return worker;

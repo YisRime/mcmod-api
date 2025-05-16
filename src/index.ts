@@ -4,9 +4,9 @@ import { serveItem } from './api/pages/item';
 import { serveModPack } from './api/pages/modpack';
 import { servePost } from './api/pages/post';
 import { serveServer } from './api/pages/server';
-import { serveSearch } from './api/search';
-import { serveModList } from './api/modlist';
-import { genDoc } from './doc';
+import { serveSearch } from './api/searchs';
+import { serveModList } from './api/searchs/modlist';
+import { genDoc } from './api/utils/doc';
 
 // Worker实现
 export default {

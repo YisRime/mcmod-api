@@ -6,7 +6,7 @@ interface Author {
   name: string;
   position?: string;
   avatar?: string;
-  url?: string;
+  id?: string;
 }
 
 interface Status {
@@ -271,11 +271,13 @@ const parseTeamMembers = ($: cheerio.CheerioAPI, selector: string, url: string):
 const parseAuthors = ($: cheerio.CheerioAPI, url: string): Author[] => {
   const authors: Author[] = [];
   $('.author .member').each((_, el) => {
+    const authorUrl = $(el).find('.name a').attr('href') || '';
+    const authorId = authorUrl.match(/\/author\/(\d+)\.html/)?.[1] || '';
     authors.push({
       name: $(el).find('.name a').text().trim(),
       position: $(el).find('.position').text().trim(),
       avatar: resolveUrl($(el).parent().find('.avatar a img').attr('src') || '', url),
-      url: resolveUrl($(el).find('.name a').attr('href') || '', url)
+      id: authorId
     });
   });
   return authors;

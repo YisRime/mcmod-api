@@ -1,4 +1,4 @@
-import { createErrorResponse } from './api';
+import { createErrorResponse } from '..';
 
 const DOC_HEADERS = {
   'Content-Type': 'text/html; charset=utf-8',
@@ -124,17 +124,17 @@ export async function genDoc(): Promise<Response> {
               <td>offset</td>
               <td class="data-type">number</td>
               <td class="parameter-optional">否</td>
-              <td>结果偏移量，默认为 0 （注：搜索结果每页固定为 30 个结果）</td>
+              <td>结果偏移量，默认为 0 （每页 30 个结果）</td>
             </tr>
             <tr>
               <td>page</td>
               <td class="data-type">number</td>
               <td class="parameter-optional">否</td>
-              <td>页码，从 1 开始，默认为 1。当提供 offset 时，此参数被忽略</td>
+              <td>页码，从 1 开始，默认为 1（提供 offset 时忽略此参数）</td>
             </tr>
             <tr>
               <td>mold</td>
-              <td class="data-type">boolean</td>
+              <td class="data-type">number</td>
               <td class="parameter-optional">否</td>
               <td>是否启用复杂搜索， 1 表示启用， 0 表示禁用，默认为 0</td>
             </tr>
@@ -142,7 +142,7 @@ export async function genDoc(): Promise<Response> {
               <td>filter</td>
               <td class="data-type">number</td>
               <td class="parameter-optional">否</td>
-              <td>结果类型过滤器，值范围 1-7 ，分别代表模组、整合包、资料、教程、作者、用户、社群，默认为 0 （不过滤）</td>
+              <td>结果类型过滤器，值范围 1-7（模组、整合包、资料、教程、作者、用户、社群），默认为 0（不过滤）</td>
             </tr>
           </tbody>
         </table>
@@ -162,37 +162,7 @@ export async function genDoc(): Promise<Response> {
             <tr>
               <td>results</td>
               <td class="data-type">array</td>
-              <td>搜索结果列表，包含匹配的内容项</td>
-            </tr>
-            <tr>
-              <td>results[].id</td>
-              <td class="data-type">string</td>
-              <td>内容ID</td>
-            </tr>
-            <tr>
-              <td>results[].name</td>
-              <td class="data-type">string</td>
-              <td>内容名称</td>
-            </tr>
-            <tr>
-              <td>results[].description</td>
-              <td class="data-type">string</td>
-              <td>内容描述</td>
-            </tr>
-            <tr>
-              <td>results[].type</td>
-              <td class="data-type">string</td>
-              <td>内容类型，可能的值： class(模组)、modpack(整合包)、item(资料)、post(教程)、author(作者)、user(用户)、community(社群)</td>
-            </tr>
-            <tr>
-              <td>results[].url</td>
-              <td class="data-type">string</td>
-              <td>内容在 MC 百科上的 URL</td>
-            </tr>
-            <tr>
-              <td>results[].category</td>
-              <td class="data-type">string</td>
-              <td>分类 ID ，仅当 type 为 class 时可能存在</td>
+              <td>搜索结果列表，包含匹配的内容项，每项包含 id(模组ID)、name(模组名称)、description(内容简介) 和 url(链接地址)</td>
             </tr>
             <tr>
               <td>page</td>
@@ -279,87 +249,27 @@ export async function genDoc(): Promise<Response> {
             <tr>
               <td>basicInfo</td>
               <td class="data-type">object</td>
-              <td>模组的基本信息</td>
-            </tr>
-            <tr>
-              <td>basicInfo.id</td>
-              <td class="data-type">string</td>
-              <td>模组ID</td>
-            </tr>
-            <tr>
-              <td>basicInfo.name</td>
-              <td class="data-type">string</td>
-              <td>模组名称</td>
-            </tr>
-            <tr>
-              <td>basicInfo.englishName</td>
-              <td class="data-type">string</td>
-              <td>模组英文名称</td>
-            </tr>
-            <tr>
-              <td>basicInfo.shortName</td>
-              <td class="data-type">string</td>
-              <td>模组简称</td>
-            </tr>
-            <tr>
-              <td>basicInfo.img</td>
-              <td class="data-type">string</td>
-              <td>模组封面图片URL</td>
-            </tr>
-            <tr>
-              <td>basicInfo.status</td>
-              <td class="data-type">object</td>
-              <td>模组状态信息</td>
-            </tr>
-            <tr>
-              <td>basicInfo.categories</td>
-              <td class="data-type">array</td>
-              <td>模组所属分类ID列表</td>
-            </tr>
-            <tr>
-              <td>basicInfo.tags</td>
-              <td class="data-type">array</td>
-              <td>模组标签列表</td>
+              <td>模组的基本信息，包含 id(模组ID)、name(模组名称)、englishName(英文名称)、shortName(简称)、img(封面图片URL)、status(包含isActive和isOpenSource的状态对象)、categories(分类ID列表)、tags(标签名称列表)</td>
             </tr>
             <tr>
               <td>compatibility</td>
               <td class="data-type">object</td>
-              <td>模组兼容性信息</td>
-            </tr>
-            <tr>
-              <td>compatibility.platforms</td>
-              <td class="data-type">array</td>
-              <td>支持的平台列表</td>
-            </tr>
-            <tr>
-              <td>compatibility.apis</td>
-              <td class="data-type">array</td>
-              <td>依赖的API列表</td>
-            </tr>
-            <tr>
-              <td>compatibility.environment</td>
-              <td class="data-type">string</td>
-              <td>运行环境信息</td>
-            </tr>
-            <tr>
-              <td>compatibility.mcVersions</td>
-              <td class="data-type">object</td>
-              <td>支持的Minecraft版本信息</td>
+              <td>模组兼容性信息，包含 platforms(支持的平台列表)、apis(依赖的API列表)、environment(运行环境信息)、mcVersions(支持的Minecraft版本对象，包含forge/fabric/behaviorPack等版本数组)</td>
             </tr>
             <tr>
               <td>authors</td>
               <td class="data-type">array</td>
-              <td>模组作者信息列表</td>
+              <td>模组作者信息列表，每项包含 name(名称), position(职位/角色), avatar(头像URL), id(作者ID) 属性</td>
             </tr>
             <tr>
               <td>links</td>
               <td class="data-type">array</td>
-              <td>模组相关链接列表</td>
+              <td>模组相关链接列表，每项包含 title(链接标题) 和 url(链接地址) 属性</td>
             </tr>
             <tr>
               <td>resources</td>
               <td class="data-type">array</td>
-              <td>模组相关资源信息</td>
+              <td>模组相关资源信息，每项包含 typeId(资源类型ID) 和 count(资源数量) 属性</td>
             </tr>
             <tr>
               <td>introduction</td>
@@ -372,19 +282,166 @@ export async function genDoc(): Promise<Response> {
               <td>模组统计和评分信息(需设置others=true)</td>
             </tr>
             <tr>
+              <td>metrics.statistics</td>
+              <td class="data-type">object</td>
+              <td>统计数据，包含 viewCount(浏览数), downloadCount(下载数), popularity(人气指数), fillRate(填充率), yesterdayIndex(昨日指数), yesterdayAvgIndex(昨日平均指数), editCount(编辑次数), modpackCount(包含此模组的整合包数量), resourceCount(资源数量), resourceDataCount(资源数据数量), serverCount(安装此模组的服务器数量), serverInstallRate(服务器安装率), createTime(收录时间), lastUpdate(最后编辑时间), lastRecommend(最后推荐时间) 等属性</td>
+            </tr>
+            <tr>
+              <td>metrics.ratings</td>
+              <td class="data-type">object</td>
+              <td>评分数据，包含 redVotes(红票/赞成数), blackVotes(黑票/反对数), detailedRatings(详细评分，按不同维度的评价) 等属性</td>
+            </tr>
+            <tr>
+              <td>metrics.updateLogs</td>
+              <td class="data-type">array</td>
+              <td>更新日志列表，每项包含 version(版本号) 和 date(更新日期) 属性</td>
+            </tr>
+            <tr>
               <td>teams</td>
               <td class="data-type">object</td>
-              <td>模组团队信息(需设置others=true)</td>
+              <td>模组团队信息(需设置others=true)，包含 managementTeam(管理团队), editingTeam(编辑团队), developmentTeam(开发团队), recentEditors(最近编辑者), recentVisitors(最近访问者) 等属性，每个属性是一个包含团队成员的数组，每个成员有 name(名称), avatar(头像URL), id(成员ID) 属性</td>
             </tr>
             <tr>
               <td>community</td>
               <td class="data-type">object</td>
-              <td>模组社区信息(需设置community=true)</td>
+              <td>模组社区信息(需设置community=true)，包含 tutorials(教程列表, 每项有id和title) 和 discussions(讨论列表, 每项有id和title) 属性</td>
             </tr>
             <tr>
               <td>relations</td>
               <td class="data-type">array</td>
-              <td>模组依赖和关联关系(需设置relations=true)</td>
+              <td>模组依赖和关联关系(需设置relations=true)，每项包含 version(适用版本), dependencyMods(依赖模组列表), relationMods(关联模组列表) 属性，其中模组列表中的每项包含 id(模组ID) 和 name(模组名称) 属性</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-title">
+        <span class="http-method get">GET</span>
+        <span class="endpoint-url">/api/modpack</span>
+      </div>
+      <div class="endpoint-description">
+        获取整合包的详细信息，包括基本信息、作者、兼容性等
+      </div>
+
+      <div class="code-block">GET /api/modpack?id=整合包ID&others=false&community=false&relations=false</div>
+
+      <div class="parameters">
+        <h3>请求参数</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>参数名</th>
+              <th>类型</th>
+              <th>是否必须</th>
+              <th>描述</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>id</td>
+              <td class="data-type">string</td>
+              <td class="parameter-required">是</td>
+              <td>整合包ID</td>
+            </tr>
+            <tr>
+              <td>others</td>
+              <td class="data-type">boolean</td>
+              <td class="parameter-optional">否</td>
+              <td>是否包含附加信息（如统计、评分、团队信息等），默认为 false</td>
+            </tr>
+            <tr>
+              <td>community</td>
+              <td class="data-type">boolean</td>
+              <td class="parameter-optional">否</td>
+              <td>是否包含社区信息（如教程），默认为 false</td>
+            </tr>
+            <tr>
+              <td>relations</td>
+              <td class="data-type">boolean</td>
+              <td class="parameter-optional">否</td>
+              <td>是否包含整合包中包含的模组信息，默认为 false</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="response-fields">
+        <h3>响应字段</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>字段</th>
+              <th>类型</th>
+              <th>描述</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>basicInfo</td>
+              <td class="data-type">object</td>
+              <td>整合包的基本信息，包含 id(整合包ID)、name(名称)、englishName(英文名称)、shortName(简称)、img(封面图片URL)、categories(分类ID列表)、tags(标签名称列表)</td>
+            </tr>
+            <tr>
+              <td>compatibility</td>
+              <td class="data-type">object</td>
+              <td>整合包兼容性信息，包含 packType(整合包类型)、apiType(运作方式列表)、packMethod(打包方式列表)、mcVersions(支持的Minecraft版本列表)</td>
+            </tr>
+            <tr>
+              <td>authors</td>
+              <td class="data-type">array</td>
+              <td>整合包作者信息列表，每项包含 name(名称)、position(职位/角色)、avatar(头像URL)、id(作者ID) 属性</td>
+            </tr>
+            <tr>
+              <td>links</td>
+              <td class="data-type">array</td>
+              <td>整合包相关链接列表，每项包含 title(链接标题) 和 url(链接地址) 属性</td>
+            </tr>
+            <tr>
+              <td>introduction</td>
+              <td class="data-type">string</td>
+              <td>整合包介绍内容(Markdown格式)</td>
+            </tr>
+            <tr>
+              <td>metrics</td>
+              <td class="data-type">object</td>
+              <td>整合包统计和评分信息(需设置others=true)</td>
+            </tr>
+            <tr>
+              <td>metrics.statistics</td>
+              <td class="data-type">object</td>
+              <td>统计数据，包含 viewCount(浏览数)、popularity(人气指数)、yesterdayIndex(昨日指数)、yesterdayAvgIndex(昨日平均指数)、editCount(编辑次数)、createTime(收录时间)、lastUpdate(最后编辑时间)、lastRecommend(最后推荐时间)</td>
+            </tr>
+            <tr>
+              <td>metrics.ratings</td>
+              <td class="data-type">object</td>
+              <td>评分数据，包含 redVotes(红票/赞成数)、blackVotes(黑票/反对数)</td>
+            </tr>
+            <tr>
+              <td>metrics.updateLogs</td>
+              <td class="data-type">array</td>
+              <td>更新日志列表，每项包含 version(版本号) 和 date(更新日期) 属性</td>
+            </tr>
+            <tr>
+              <td>teams</td>
+              <td class="data-type">object</td>
+              <td>整合包团队信息(需设置others=true)，包含 recentEditors(最近编辑者)、recentVisitors(最近访问者) 等属性，每个属性是一个包含团队成员的数组，每个成员有 name(名称)、avatar(头像URL)、id(成员ID)</td>
+            </tr>
+            <tr>
+              <td>relations</td>
+              <td class="data-type">object</td>
+              <td>整合包关联信息</td>
+            </tr>
+            <tr>
+              <td>relations.mods</td>
+              <td class="data-type">array</td>
+              <td>包含的模组列表(需设置relations=true)，每项包含 id(模组ID)、name(模组名称)、version(模组版本) 属性</td>
+            </tr>
+            <tr>
+              <td>relations.tutorials</td>
+              <td class="data-type">array</td>
+              <td>相关教程列表(需设置community=true)，每项包含 id(教程ID) 和 title(教程标题) 属性</td>
             </tr>
           </tbody>
         </table>
