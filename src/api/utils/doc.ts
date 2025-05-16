@@ -447,6 +447,106 @@ export async function genDoc(): Promise<Response> {
         </table>
       </div>
     </div>
+
+    <div class="endpoint">
+      <div class="endpoint-title">
+        <span class="http-method get">GET</span>
+        <span class="endpoint-url">/api/post</span>
+      </div>
+      <div class="endpoint-description">
+        获取MC百科上的教程内容，包括文章内容、作者信息等
+      </div>
+
+      <div class="code-block">GET /api/post?id=教程ID&others=false</div>
+
+      <div class="parameters">
+        <h3>请求参数</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>参数名</th>
+              <th>类型</th>
+              <th>是否必须</th>
+              <th>描述</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>id</td>
+              <td class="data-type">string</td>
+              <td class="parameter-required">是</td>
+              <td>教程ID</td>
+            </tr>
+            <tr>
+              <td>others</td>
+              <td class="data-type">boolean</td>
+              <td class="parameter-optional">否</td>
+              <td>是否包含附加信息（如统计、作者、团队信息等），默认为 false</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="response-fields">
+        <h3>响应字段</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>字段</th>
+              <th>类型</th>
+              <th>描述</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>id</td>
+              <td class="data-type">string</td>
+              <td>教程ID</td>
+            </tr>
+            <tr>
+              <td>title</td>
+              <td class="data-type">string</td>
+              <td>教程标题</td>
+            </tr>
+            <tr>
+              <td>content</td>
+              <td class="data-type">string</td>
+              <td>教程内容（Markdown格式）</td>
+            </tr>
+            <tr>
+              <td>author</td>
+              <td class="data-type">object</td>
+              <td>作者信息（需设置others=true），包含 name(名称)、avatar(头像URL)、id(用户ID) 属性</td>
+            </tr>
+            <tr>
+              <td>metrics</td>
+              <td class="data-type">object</td>
+              <td>教程统计信息（需设置others=true）</td>
+            </tr>
+            <tr>
+              <td>metrics.statistics</td>
+              <td class="data-type">object</td>
+              <td>统计数据，包含 viewCount(浏览数)、editCount(编辑次数)、createTime(创建时间)、lastUpdate(最后更新时间)、permissions(权限) 属性</td>
+            </tr>
+            <tr>
+              <td>teams</td>
+              <td class="data-type">object</td>
+              <td>教程团队信息（需设置others=true）</td>
+            </tr>
+            <tr>
+              <td>teams.recentEditors</td>
+              <td class="data-type">array</td>
+              <td>最近编辑者列表，每项包含 name(名称)、avatar(头像URL)、id(用户ID) 属性</td>
+            </tr>
+            <tr>
+              <td>teams.recentVisitors</td>
+              <td class="data-type">array</td>
+              <td>最近访问者列表，每项包含 name(名称)、avatar(头像URL)、id(用户ID) 属性</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </main>
 
   <footer>
