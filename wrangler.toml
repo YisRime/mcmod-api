@@ -4,3 +4,5 @@ compatibility_date = "2023-11-01"
 
 [observability.logs]
 enabled = true
+[placement]
+mode = "smart"
