@@ -10,7 +10,7 @@ interface Author {
 }
 
 interface Status {
-  isActive: boolean;
+  status: 'active' | 'semi-abandoned' | 'inactive'; // 活跃、半弃坑、停更
   isOpenSource: boolean;
 }
 
@@ -383,7 +383,12 @@ async function parseMod(id: string, url: string, showOthers: boolean = false, sh
       shortName: $('.class-title .short-name').text().trim(),
       img: resolveUrl($('.class-cover-image img').attr('src') || '', url),
       status: {
-        isActive: $('.class-status').text().trim() !== '停更',
+        status: (() => {
+          const statusText = $('.class-status').text().trim();
+          if (statusText === '停更') return 'inactive';
+          if (statusText === '半弃坑') return 'semi-abandoned';
+          return 'active';
+        })(),
         isOpenSource: $('.class-source').text().trim() !== '闭源'
       },
       categories: parseCategories($),
