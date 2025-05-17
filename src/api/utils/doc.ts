@@ -599,97 +599,102 @@ export async function genDoc(): Promise<Response> {
           </thead>
           <tbody>
             <tr>
-              <td>id</td>
+              <td></td>
+              <td class="data-type">array</td>
+              <td>物品信息数组，可能包含多个物品</td>
+            </tr>
+            <tr>
+              <td>[].id</td>
               <td class="data-type">string</td>
               <td>资料ID</td>
             </tr>
             <tr>
-              <td>name</td>
+              <td>[].name</td>
               <td class="data-type">string</td>
               <td>资料名称</td>
             </tr>
             <tr>
-              <td>englishName</td>
+              <td>[].englishName</td>
               <td class="data-type">string</td>
               <td>资料英文名称</td>
             </tr>
             <tr>
-              <td>icon</td>
+              <td>[].icon</td>
               <td class="data-type">string</td>
               <td>资料图标URL</td>
             </tr>
             <tr>
-              <td>command</td>
+              <td>[].command</td>
               <td class="data-type">string</td>
-              <td>获取物品的命令（如/give命令）</td>
+              <td>获取物品的命令</td>
             </tr>
             <tr>
-              <td>modId</td>
+              <td>[].modId</td>
               <td class="data-type">string</td>
               <td>资料所属模组ID</td>
             </tr>
             <tr>
-              <td>modName</td>
+              <td>[].modName</td>
               <td class="data-type">string</td>
               <td>资料所属模组名称</td>
             </tr>
             <tr>
-              <td>modUrl</td>
+              <td>[].modUrl</td>
               <td class="data-type">string</td>
               <td>资料所属模组页面URL</td>
             </tr>
             <tr>
-              <td>category</td>
+              <td>[].category</td>
               <td class="data-type">string</td>
               <td>资料分类名称</td>
             </tr>
             <tr>
-              <td>categoryUrl</td>
+              <td>[].categoryUrl</td>
               <td class="data-type">string</td>
               <td>资料分类页面URL</td>
             </tr>
             <tr>
-              <td>introduction</td>
+              <td>[].introduction</td>
               <td class="data-type">string</td>
               <td>资料介绍(Markdown格式)</td>
             </tr>
             <tr>
-              <td>properties</td>
+              <td>[].properties</td>
               <td class="data-type">array</td>
               <td>资料属性列表，每项包含 name(属性名) 和 value(属性值)</td>
             </tr>
             <tr>
-              <td>recipes</td>
+              <td>[].recipes</td>
               <td class="data-type">array</td>
               <td>物品合成配方列表，每项包含 type(配方类型)、materials(材料列表)、result(产物信息) 和 notes(备注说明) 属性</td>
             </tr>
             <tr>
-              <td>metrics</td>
+              <td>[].metrics</td>
               <td class="data-type">object</td>
               <td>资料统计信息(需设置others=true)</td>
             </tr>
             <tr>
-              <td>metrics.statistics</td>
+              <td>[].metrics.statistics</td>
               <td class="data-type">object</td>
               <td>统计数据，包含 viewCount(浏览数)、editCount(编辑次数)、createTime(收录时间)、lastUpdate(最后编辑时间) 属性</td>
             </tr>
             <tr>
-              <td>teams</td>
+              <td>[].teams</td>
               <td class="data-type">object</td>
               <td>资料相关团队和资料信息(需设置others=true)</td>
             </tr>
             <tr>
-              <td>teams.recentEditors</td>
+              <td>[].teams.recentEditors</td>
               <td class="data-type">array</td>
               <td>最近编辑者列表，每项包含 name(名称)、avatar(头像URL)、id(用户ID) 属性</td>
             </tr>
             <tr>
-              <td>teams.recentVisitors</td>
+              <td>[].teams.recentVisitors</td>
               <td class="data-type">array</td>
               <td>最近访问者列表，每项包含 name(名称)、avatar(头像URL)、id(用户ID) 属性</td>
             </tr>
             <tr>
-              <td>teams.relatedItems</td>
+              <td>[].teams.relatedItems</td>
               <td class="data-type">array</td>
               <td>相关资料列表，每项包含 id(资料ID)、name(资料名称)、icon(资料图标URL)、url(资料页面URL)、isHighlight(是否高亮显示) 属性</td>
             </tr>
