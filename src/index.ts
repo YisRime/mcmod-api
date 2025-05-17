@@ -3,9 +3,7 @@ import { serveClass } from './api/pages/class';
 import { serveItem } from './api/pages/item';
 import { serveModPack } from './api/pages/modpack';
 import { servePost } from './api/pages/post';
-import { serveServer } from './api/pages/server';
 import { serveSearch } from './api/searchs';
-import { serveModList } from './api/searchs/modlist';
 import { genDoc } from './api/utils/doc';
 
 // Worker实现
@@ -23,9 +21,7 @@ export default {
         '/api/item': serveItem,
         '/api/modpack': serveModPack,
         '/api/post': servePost,
-        '/api/server': serveServer,
-        '/api/search': serveSearch,
-        '/api/modlist': serveModList
+        '/api/search': serveSearch
       };
       // 处理API文档请求
       if (path === '/') return await genDoc();

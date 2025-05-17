@@ -1,7 +1,5 @@
-import * as cheerio from 'cheerio';
-
 // 类型定义
-export interface ApiError {
+interface ApiError {
   error: string;
   message: string;
   status?: number;
@@ -16,15 +14,14 @@ export const CORS_HEADERS = {
 export const BASE_URL = "https://www.mcmod.cn";
 
 // 通用配置
-export const FETCH_OPTS = {
+const FETCH_OPTS = {
   headers: {'User-Agent': 'Mozilla/5.0'},
   cf: { cacheTtl: 3600, cacheEverything: true }
 };
 
-export const TIMEOUT = 30000;
+const TIMEOUT = 30000;
+const DEBUG = false;
 
-// 调试日志
-export const DEBUG = true;
 export function log(module: string, message: string, data?: any): void {
   if (!DEBUG) return;
   const ts = new Date().toISOString();
@@ -63,34 +60,6 @@ export async function fetchHtml(url: string): Promise<string> {
   }
 }
 
-export function resolveUrl(path: string | undefined, baseUrl: string): string | undefined {
-  if (!path) return undefined;
-  return path.startsWith('http') ? path : `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
-}
-
-export function getText($: cheerio.CheerioAPI, selector: string): string[] {
-  const texts: string[] = [];
-  $(selector).each((_, el) => {
-    const text = $(el).text().trim();
-    if (text) texts.push(text);
-  });
-  return texts;
-}
-
-export function cleanHtml(html: string): string {
-  const $ = cheerio.load(html);
-  $('*').not('p, br, img').each((_, el) => {
-    const $el = $(el);
-    $el.replaceWith($el.html() || '');
-  });
-  return $.html()
-    .replace(/<p>/g, '')
-    .replace(/<\/p>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/<br\s*\/?>/g, '\n')
-    .trim();
-}
-
 // 响应处理
 export function createErrorResponse(error: ApiError | Error | string): Response {
   const err = typeof error === 'string' 
@@ -113,8 +82,4 @@ export function validateId(value: string | null): string | ApiError {
   if (!value) return { error: '参数缺失', message: '缺少ID参数', status: 400 };
   if (!/^\d+$/.test(value)) return { error: '无效参数', message: 'ID必须是数字', status: 400 };
   return value;
-}
-
-export function validatePage(value: string | null): number {
-  return value && /^\d+$/.test(value) ? parseInt(value, 10) : 1;
 }
