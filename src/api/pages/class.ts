@@ -67,7 +67,10 @@ interface Ratings {
 interface McVersions {
   forge?: string[];
   fabric?: string[];
-  behaviorPack?: string[];
+  behaviorPack?: string[]; // 改名更清晰
+  dataPack?: string[];  // 改名更清晰
+  quilt?: string[];     // 新增 Quilt 支持
+  neoforge?: string[];  // 新增 NeoForge 支持
 }
 
 interface Link {
@@ -405,9 +408,12 @@ async function parseMod(id: string, url: string, showOthers: boolean = false, sh
     $('.mcver ul').each((_, el) => {
       const loaderLabel = $(el).find('li').first().text().trim();
       const versions = $(el).find('a').map((_, link) => $(link).text().trim()).get();
-      if (loaderLabel.includes('行为包')) mcVersions.behaviorPack = versions;
+      if (loaderLabel.includes('数据包')) mcVersions.dataPack = versions;
+      else if (loaderLabel.includes('行为包')) mcVersions.behaviorPack = versions;
       else if (loaderLabel.includes('Forge')) mcVersions.forge = versions;
       else if (loaderLabel.includes('Fabric')) mcVersions.fabric = versions;
+      else if (loaderLabel.includes('Quilt')) mcVersions.quilt = versions;
+      else if (loaderLabel.includes('NeoForge')) mcVersions.neoforge = versions;
     });
     if (Object.keys(mcVersions).length > 0) compatibility.mcVersions = mcVersions;
     // 创建基础模组对象

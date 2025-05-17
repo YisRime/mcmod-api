@@ -97,7 +97,7 @@ export async function genDoc(): Promise<Response> {
         <span class="endpoint-url">/api/search</span>
       </div>
       <div class="endpoint-description">
-        根据关键词搜索 MC 百科内容，包括模组、物品、模组包等
+        根据关键词搜索 MC 百科内容，包括模组、资料、模组包等
       </div>
 
       <div class="code-block">GET /api/search?q=关键词&page=1&mold=0&filter=0</div>
@@ -254,7 +254,7 @@ export async function genDoc(): Promise<Response> {
             <tr>
               <td>compatibility</td>
               <td class="data-type">object</td>
-              <td>模组兼容性信息，包含 platforms(支持的平台列表)、apis(依赖的API列表)、environment(运行环境信息)、mcVersions(支持的Minecraft版本对象，包含forge/fabric/behaviorPack等版本数组)</td>
+              <td>模组兼容性信息，包含 platforms(支持的平台列表)、apis(依赖的API列表)、environment(运行环境信息)、mcVersions(支持的Minecraft版本对象，包含forge/neoforge/fabric/dataPack/behaviorPack等版本数组)</td>
             </tr>
             <tr>
               <td>authors</td>
@@ -542,6 +542,156 @@ export async function genDoc(): Promise<Response> {
               <td>teams.recentVisitors</td>
               <td class="data-type">array</td>
               <td>最近访问者列表，每项包含 name(名称)、avatar(头像URL)、id(用户ID) 属性</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <div class="endpoint-title">
+        <span class="http-method get">GET</span>
+        <span class="endpoint-url">/api/item</span>
+      </div>
+      <div class="endpoint-description">
+        获取MC百科上资料的详细信息，包括基本信息、属性、合成表等
+      </div>
+
+      <div class="code-block">GET /api/item?id=资料ID&others=false</div>
+
+      <div class="parameters">
+        <h3>请求参数</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>参数名</th>
+              <th>类型</th>
+              <th>是否必须</th>
+              <th>描述</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>id</td>
+              <td class="data-type">string</td>
+              <td class="parameter-required">是</td>
+              <td>资料ID</td>
+            </tr>
+            <tr>
+              <td>others</td>
+              <td class="data-type">boolean</td>
+              <td class="parameter-optional">否</td>
+              <td>是否包含附加信息（如统计、团队信息等），默认为 false</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="response-fields">
+        <h3>响应字段</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>字段</th>
+              <th>类型</th>
+              <th>描述</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>id</td>
+              <td class="data-type">string</td>
+              <td>资料ID</td>
+            </tr>
+            <tr>
+              <td>name</td>
+              <td class="data-type">string</td>
+              <td>资料名称</td>
+            </tr>
+            <tr>
+              <td>englishName</td>
+              <td class="data-type">string</td>
+              <td>资料英文名称</td>
+            </tr>
+            <tr>
+              <td>icon</td>
+              <td class="data-type">string</td>
+              <td>资料图标URL</td>
+            </tr>
+            <tr>
+              <td>command</td>
+              <td class="data-type">string</td>
+              <td>获取物品的命令（如/give命令）</td>
+            </tr>
+            <tr>
+              <td>modId</td>
+              <td class="data-type">string</td>
+              <td>资料所属模组ID</td>
+            </tr>
+            <tr>
+              <td>modName</td>
+              <td class="data-type">string</td>
+              <td>资料所属模组名称</td>
+            </tr>
+            <tr>
+              <td>modUrl</td>
+              <td class="data-type">string</td>
+              <td>资料所属模组页面URL</td>
+            </tr>
+            <tr>
+              <td>category</td>
+              <td class="data-type">string</td>
+              <td>资料分类名称</td>
+            </tr>
+            <tr>
+              <td>categoryUrl</td>
+              <td class="data-type">string</td>
+              <td>资料分类页面URL</td>
+            </tr>
+            <tr>
+              <td>introduction</td>
+              <td class="data-type">string</td>
+              <td>资料介绍(Markdown格式)</td>
+            </tr>
+            <tr>
+              <td>properties</td>
+              <td class="data-type">array</td>
+              <td>资料属性列表，每项包含 name(属性名) 和 value(属性值)</td>
+            </tr>
+            <tr>
+              <td>recipes</td>
+              <td class="data-type">array</td>
+              <td>物品合成配方列表，每项包含 type(配方类型)、materials(材料列表)、result(产物信息) 和 notes(备注说明) 属性</td>
+            </tr>
+            <tr>
+              <td>metrics</td>
+              <td class="data-type">object</td>
+              <td>资料统计信息(需设置others=true)</td>
+            </tr>
+            <tr>
+              <td>metrics.statistics</td>
+              <td class="data-type">object</td>
+              <td>统计数据，包含 viewCount(浏览数)、editCount(编辑次数)、createTime(收录时间)、lastUpdate(最后编辑时间) 属性</td>
+            </tr>
+            <tr>
+              <td>teams</td>
+              <td class="data-type">object</td>
+              <td>资料相关团队和资料信息(需设置others=true)</td>
+            </tr>
+            <tr>
+              <td>teams.recentEditors</td>
+              <td class="data-type">array</td>
+              <td>最近编辑者列表，每项包含 name(名称)、avatar(头像URL)、id(用户ID) 属性</td>
+            </tr>
+            <tr>
+              <td>teams.recentVisitors</td>
+              <td class="data-type">array</td>
+              <td>最近访问者列表，每项包含 name(名称)、avatar(头像URL)、id(用户ID) 属性</td>
+            </tr>
+            <tr>
+              <td>teams.relatedItems</td>
+              <td class="data-type">array</td>
+              <td>相关资料列表，每项包含 id(资料ID)、name(资料名称)、icon(资料图标URL)、url(资料页面URL)、isHighlight(是否高亮显示) 属性</td>
             </tr>
           </tbody>
         </table>
