@@ -1,0 +1,49 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# 构建产物
+dist
+*.tsbuildinfo
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 文档
+README.md
+LICENSE
+*.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Vercel 和 Cloudflare Workers 相关
+.vercel
+.wrangler
+wrangler.toml
+vercel.json
+
+# 测试
+coverage
+.nyc_output
+*.log

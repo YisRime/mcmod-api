@@ -42,3 +42,6 @@ lerna-debug.log*
 target/
 wrangler-dist/
 worker/
+
+# Docker
+docker-compose.override.yml

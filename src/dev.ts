@@ -1,7 +1,7 @@
 import http from 'http';
 import { URL } from 'url';
 
-const PORT = 4000;
+const PORT = 6666;
 let worker: any = null;
 
 // 导入 worker 模块

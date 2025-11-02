@@ -4,9 +4,44 @@
 
 ## 🚀 部署方式
 
-本项目支持两种部署平台：
+本项目支持三种部署平台：
 
-### 1. Cloudflare Workers 部署
+### 1. Docker 部署（推荐）
+
+使用 Docker 可以快速部署到任何支持容器的环境。
+
+#### 使用 Docker Compose（推荐）
+
+```bash
+# 构建并启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+```
+
+#### 使用 Docker 命令
+
+```bash
+# 构建镜像
+docker build -t mcmod-api .
+
+# 运行容器
+docker run -d -p 6666:6666 --name mcmod-api mcmod-api
+
+# 查看日志
+docker logs -f mcmod-api
+
+# 停止容器
+docker stop mcmod-api
+```
+
+服务启动后，访问 `http://localhost:6666` 即可使用 API。
+
+### 2. Cloudflare Workers 部署
 
 ```bash
 # 安装依赖
@@ -19,7 +54,7 @@ npm run dev
 npx wrangler deploy
 ```
 
-### 2. Vercel 部署
+### 3. Vercel 部署
 
 ```bash
 # 安装依赖
@@ -35,19 +70,23 @@ vercel deploy
 
 ```
 mcmod-api/
-├── src/                 # 核心业务逻辑（共享）
-│   ├── index.ts        # Cloudflare Workers 入口
-│   └── api/            # 核心 API 实现
-├── api/                # Vercel Serverless Functions 适配层
-│   ├── _utils.ts       # Vercel 工具函数
-│   ├── index.ts        # API 首页
-│   ├── class.ts        # 模组 API
-│   ├── item.ts         # 物品 API
-│   ├── modpack.ts      # 整合包 API
-│   ├── post.ts         # 教程 API
-│   └── search.ts       # 搜索 API
-├── wrangler.toml       # Cloudflare Workers 配置
-└── vercel.json         # Vercel 配置
+├── src/                     # 核心业务逻辑（共享）
+│   ├── index.ts            # Cloudflare Workers 入口
+│   ├── dev.ts              # 本地开发服务器
+│   └── api/                # 核心 API 实现
+├── api/                     # Vercel Serverless Functions 适配层
+│   ├── _utils.ts           # Vercel 工具函数
+│   ├── index.ts            # API 首页
+│   ├── class.ts            # 模组 API
+│   ├── item.ts             # 物品 API
+│   ├── modpack.ts          # 整合包 API
+│   ├── post.ts             # 教程 API
+│   └── search.ts           # 搜索 API
+├── Dockerfile              # Docker 镜像构建文件
+├── docker-compose.yml      # Docker Compose 配置
+├── .dockerignore           # Docker 忽略文件
+├── wrangler.toml           # Cloudflare Workers 配置
+└── vercel.json             # Vercel 配置
 ```
 
 
@@ -202,6 +241,10 @@ mcmod-api/
   // 可能包含多个物品
 ]
 ```
+
+## 📚 文档
+
+详细的API文档可通过访问API根路径获取（`http://localhost:6666`）
 
 ## 使用须知
 
