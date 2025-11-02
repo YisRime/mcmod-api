@@ -68,7 +68,7 @@ vercel deploy
 
 ## 📁 项目结构
 
-```
+```text
 mcmod-api/
 ├── src/                     # 核心业务逻辑（共享）
 │   ├── index.ts            # Cloudflare Workers 入口
@@ -88,7 +88,6 @@ mcmod-api/
 ├── wrangler.toml           # Cloudflare Workers 配置
 └── vercel.json             # Vercel 配置
 ```
-
 
 ## API端点概览
 
