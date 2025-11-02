@@ -8,6 +8,7 @@ dist/
 build/
 .wrangler/
 .dev.vars
+.vercel
 
 # TypeScript缓存
 *.tsbuildinfo

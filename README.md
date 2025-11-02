@@ -1,6 +1,55 @@
 # MCmod API
 
-基于Cloudflare Workers的轻量级API服务，提供MCMod中文网(mcmod.cn)数据的非官方API。
+基于 Cloudflare Workers 和 Vercel 的轻量级 API 服务，提供 MCMod 中文网(mcmod.cn)数据的非官方 API。
+
+## 🚀 部署方式
+
+本项目支持两种部署平台：
+
+### 1. Cloudflare Workers 部署
+
+```bash
+# 安装依赖
+npm install
+
+# 本地开发
+npm run dev
+
+# 部署到 Cloudflare Workers
+npx wrangler deploy
+```
+
+### 2. Vercel 部署
+
+```bash
+# 安装依赖
+npm install
+
+# 部署到 Vercel
+vercel deploy
+```
+
+或者直接使用 Vercel 的 Git 集成，推送代码后自动部署。
+
+## 📁 项目结构
+
+```
+mcmod-api/
+├── src/                 # 核心业务逻辑（共享）
+│   ├── index.ts        # Cloudflare Workers 入口
+│   └── api/            # 核心 API 实现
+├── api/                # Vercel Serverless Functions 适配层
+│   ├── _utils.ts       # Vercel 工具函数
+│   ├── index.ts        # API 首页
+│   ├── class.ts        # 模组 API
+│   ├── item.ts         # 物品 API
+│   ├── modpack.ts      # 整合包 API
+│   ├── post.ts         # 教程 API
+│   └── search.ts       # 搜索 API
+├── wrangler.toml       # Cloudflare Workers 配置
+└── vercel.json         # Vercel 配置
+```
+
 
 ## API端点概览
 

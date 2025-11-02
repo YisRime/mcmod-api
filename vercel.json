@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/**/*.ts", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(class|item|modpack|post|search)", "dest": "/api/$1.ts" },
+    { "src": "/api/?$", "dest": "/api/index.ts" },
+    { "src": "/api/(.*)", "dest": "/api/[...catchall].ts" }
+  ]
+}
