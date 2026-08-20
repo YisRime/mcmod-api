@@ -2,15 +2,19 @@
 
 基于 Cloudflare Workers 和 Vercel 的轻量级 API 服务，提供 MCMod 中文网(mcmod.cn)数据的非官方 API。
 
+如果这个项目对您有帮助，请给我一个 ⭐️ Star！
+
+**QQ 群**: [855571375](https://qm.qq.com/q/PdLMx9Jowq) - 用户交流、问题反馈
+
 ## 🚀 部署方式
 
 本项目支持三种部署平台：
 
-### 1. Docker 部署（推荐）
+### 1. Docker 部署（不推荐，暂时没做好支持）
 
 使用 Docker 可以快速部署到任何支持容器的环境。
 
-#### 使用 Docker Compose（推荐）
+#### 使用 Docker Compose
 
 ```bash
 # 构建并启动服务
